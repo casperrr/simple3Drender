@@ -1,15 +1,25 @@
 const canvas = document.getElementById("canvas");
 const c = canvas.getContext('2d');
 
-
+// Globals
 let points = [];
-let angle = 0.01;
+let angle = 0;
+let scale = 300; //tip: when using perspective use distance*100
+let distance = 3;
 
 //Matrixes:
-let projMat = [
+let orthoProjMat = [
     [1,0,0],
     [0,1,0]
 ];
+
+function usePerspective(matrix,z){
+    for(let i = 0; i < matrix.length; i++){
+        for(let j = 0; j < matrix[0].length; j++){
+            matrix[i][j] != 0 ? matrix[i][j] = z : matrix[i][j] = 0;
+        }
+    }
+}
 
 
 function init(){
@@ -20,7 +30,6 @@ function init(){
 function bg(){
     c.fillStyle = '#000000';
     c.fillRect(canvas.width*-0.5,canvas.height*-0.5,canvas.width,canvas.height);
-    //c.fillRect(0,0,canvas.width,canvas.height);
 }
 
 function loop(){
@@ -32,9 +41,9 @@ function loop(){
     rotArr = rotZ(angle,rotArr);
 
 
-    arr = aplyMat(projMat,rotArr);
-    arr.forEach(i => i.scalar(100)); //Scale Points Up
-    draw(arr);
+    arr = aplyMat(orthoProjMat,rotArr);
+    arr.forEach(i => i.scalar(scale)); //Scale Points Up
+    //draw(arr);
     conCube(arr);
 
     angle += 0.01;
@@ -96,6 +105,8 @@ function makeCube(){
 function aplyMat(matrix, arr){
     let newArr = [];
     for(let i = 0; i < arr.length; i++){
+        let z = 1/(distance-arr[i].mat[2]);
+        usePerspective(matrix,z)
         newArr[i] = arr[i].dotProd(matrix);
     }
     return newArr;
