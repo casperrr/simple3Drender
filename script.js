@@ -26,15 +26,18 @@ function bg(){
 function loop(){
     bg();
 
-    rotZ(angle);
-    rotY(angle);
-    rotX(angle);
+    let rotArr = points;
+    rotArr = rotX(angle,rotArr);
+    rotArr = rotY(angle,rotArr);
+    rotArr = rotZ(angle,rotArr);
 
-    let arr = aplyMat(projMat,points);
+
+    arr = aplyMat(projMat,rotArr);
     arr.forEach(i => i.scalar(100)); //Scale Points Up
     draw(arr);
     conCube(arr);
 
+    angle += 0.01;
     requestAnimationFrame(loop);
 }
 
@@ -98,38 +101,40 @@ function aplyMat(matrix, arr){
     return newArr;
 }
 
-function rotX(ang){
+function rotX(ang,arr){
     let rXmat = [
         [1,0,0],
         [0,Math.cos(ang),-Math.sin(ang)],
         [0,Math.sin(ang),Math.cos(ang)]
     ];
-    applyRotMat(rXmat,points);
+    return applyRotMat(rXmat,arr);
 }
 
-function rotY(ang){
+function rotY(ang,arr){
     let rYmat = [
         [Math.cos(ang),0,Math.sin(ang)],
         [0,1,0],
         [-Math.sin(ang),0,Math.cos(ang)]
     ];
-    applyRotMat(rYmat,points);
+    return applyRotMat(rYmat,arr);
 }
 
-function rotZ(ang){
+function rotZ(ang,arr){
     let rZmat = [
         [Math.cos(ang),-Math.sin(ang),0],
         [Math.sin(ang),Math.cos(ang),0],
         [0,0,1]
     ];
-    applyRotMat(rZmat,points);
+    return applyRotMat(rZmat,arr);
 }
 
 
 function applyRotMat(matrix,arr){
+    let newArr = [];
     for(let i = 0; i < arr.length; i++){
-        arr[i] = arr[i].dotProd(matrix);
+        newArr[i] = arr[i].dotProd(matrix);
     }
+    return newArr;
 } 
 
 
