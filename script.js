@@ -84,6 +84,33 @@ class Cube{
         this.points = arr;
     }
 }
+class Cube4D{
+    constructor(){
+        this.points = [];
+        this.xrot = 0;
+        this.yrot = 0;
+        this.zrot = 0;
+        this.wrot = 0;
+        this.scl = 300;
+        //this.pos = ima not worry about this for now. 
+    }
+
+    makeCube(){
+        let arr = [];
+        for(let i = 0; i < 16; i++){
+            arr.push(new Matrix(4,1));
+            arr[i].mat = [
+                [(i&1) == 0 ? -1 : 1],
+                [(i&2) == 0 ? -1 : 1],
+                [(i&4) == 0 ? -1 : 1],
+                [(i&8) == 0 ? -1 : 1]];
+        }
+        this.points = arr;
+    }
+}
+
+
+
 
 class Render3D{
     constructor(ortho,distance){
