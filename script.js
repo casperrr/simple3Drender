@@ -3,15 +3,24 @@ const c = canvas.getContext('2d');
 
 // Globals
 let cube;
+let hypercube;
 let render;
+let render4D;
+
+let projecTo3D;
 
 
 
 function init(){
     c.translate(canvas.width/2,canvas.height/2);
-    cube = new Cube();
+    //cube = new Cube();
+    hypercube = new Cube4D();
+    hypercube.makeCube();
     render = new Render3D(false,4);
-    cube.makeCube();
+    render4D = new Render4D(false,2);
+    projecTo3D = new Cube();
+    //cube.makeCube();
+
 }
 
 function bg(){
@@ -22,10 +31,13 @@ function bg(){
 function loop(){
     bg();
 
-    render.drawShape(cube);
+    //render.drawShape(cube);
+    hypercube.makeCube();
+    render4D.draw4D(hypercube);
 
+    projecTo3D.yrot += 0.003;
     //cube.xrot += 0.01;
-    cube.yrot += 0.01;
+    //cube.yrot += 0.01;
 
     requestAnimationFrame(loop);
 }
@@ -110,7 +122,49 @@ class Cube4D{
 }
 
 
+class Render4D{
+    //Renders 4D to 3D
+    constructor(ortho,distance){
+        this.ortho = ortho;
+        this.distance = distance;
+        
+    }
 
+    draw4D(shape){
+        let rotatedShape = shape.points;
+        //Rotate shape.
+
+        //Project shape to 3D
+        let projectedShape = this.#projectShape(rotatedShape);
+        //Send 3D projection to 3D render.
+        
+        projecTo3D.points = projectedShape;
+        render.drawShape(projecTo3D);
+
+    }
+
+    
+
+    #projectShape(shape){
+        let projShape = shape;
+        projShape.forEach((mat,i)=>{
+            let x=this.#projectPoint(mat);
+            projShape[i] = x;
+        });
+        return projShape;
+    }
+
+    #projectPoint(point){
+        let w;
+        this.ortho ? w=1:w = 1/(this.distance-point.mat[3]);
+        let projMat = [
+            [w,0,0,0],
+            [0,w,0,0],
+            [0,0,w,0]
+        ];
+        return point.dotProd(projMat);
+    }
+}
 
 class Render3D{
     constructor(ortho,distance){
@@ -132,7 +186,7 @@ class Render3D{
         projectedShape.forEach(i => i.scalar(shape.scl));
         //Draw shape.
         this.#drawPoints(projectedShape);
-        this.#connectPointsCube(projectedShape);
+        this.#connectPointsHypercube(projectedShape);
     }
 
     #connectPointsCube(shape){
@@ -142,6 +196,24 @@ class Render3D{
             this.#connectPoints(shape[order[i]+4],shape[order[(i+1)%4]+4]);
             this.#connectPoints(shape[i],shape[i+4]);
         }
+    }
+    
+    #connectPointsHypercube(shape){
+        let order = [0,1,3,2]
+        for(let i = 0; i < 4; i++){
+            //inner cube
+            this.#connectPoints(shape[order[i]],shape[order[(i+1)%4]]);
+            this.#connectPoints(shape[order[i]+4],shape[order[(i+1)%4]+4]);
+            this.#connectPoints(shape[i],shape[i+4]);
+            //outer cube
+            this.#connectPoints(shape[order[i]+8],shape[order[(i+1)%4]+8]);
+            this.#connectPoints(shape[order[i]+8+4],shape[order[(i+1)%4]+8+4]);
+            this.#connectPoints(shape[i+8],shape[i+8+4]);
+            //connect inner to outer
+            this.#connectPoints(shape[i],shape[i+8]);
+            this.#connectPoints(shape[i+4],shape[i+8+4]);
+        }
+
     }
 
     #connectPoints(a,b){
