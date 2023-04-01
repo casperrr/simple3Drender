@@ -1,5 +1,8 @@
 const canvas = document.getElementById("canvas");
 const c = canvas.getContext('2d');
+const inputs = document.querySelector('.inputs');
+
+
 
 // Globals
 const pi = Math.PI;
@@ -11,6 +14,23 @@ let render4D;
 
 let projecTo3D;
 
+//globals for inputs
+var x3d = 0;
+var y3d = 0;
+var z3d = 0;
+
+var zw4d = 0;
+var xw4d = 0;
+
+
+//Event handler for sliders
+inputs.addEventListener('input',(e)=>{
+    if (e.target !== e.currentTarget){
+        let inputChanged = e.target;
+        window[inputChanged.id] = inputChanged.value;
+    }
+    e.stopPropagation;
+},false);
 
 
 function init(){
@@ -40,11 +60,15 @@ function loop(){
     // hypercube.xrot += 0.001;
     // hypercube.xrot = pi/2;
     // hypercube.yrot = -90;
-    hypercube.zrot += 0.001;
-    hypercube.wrot += 0.003;
+    // hypercube.zrot += 0.001;
+    // hypercube.wrot += 0.003;
     //projecTo3D.yrot += 0.003;
     //cube.xrot += 0.01;
     //cube.yrot += 0.01;
+
+    hypercube.xwrot=xw4d;
+    hypercube.zwrot=zw4d;
+
 
     requestAnimationFrame(loop);
 }
@@ -109,7 +133,8 @@ class Cube4D{
         this.xrot = 0;
         this.yrot = 0;
         this.zrot = 0;
-        this.wrot = 0;
+        this.zwrot = 0;
+        this.xwrot = 0;
         this.scl = 300;
         //this.pos = ima not worry about this for now. 
     }
@@ -143,7 +168,8 @@ class Render4D{
         rotatedShape = this.#rotX(shape.xrot,rotatedShape);
         rotatedShape = this.#rotY(shape.yrot,rotatedShape);
         rotatedShape = this.#rotZ(shape.zrot,rotatedShape);
-        rotatedShape = this.#rotZW(shape.wrot,rotatedShape);
+        rotatedShape = this.#rotZW(shape.zwrot,rotatedShape);
+        rotatedShape = this.#rotXW(shape.xwrot,rotatedShape);
         //Project shape to 3D
         let projectedShape = this.#projectShape(rotatedShape);
         //Send 3D projection to 3D render.
@@ -243,9 +269,9 @@ class Render3D{
     drawShape(shape){
         let rotatedShape = shape.points;
         //Rotate shape.
-        rotatedShape = this.#rotX(-pi/2,rotatedShape);
-        rotatedShape = this.#rotY(shape.yrot,rotatedShape);
-        rotatedShape = this.#rotZ(shape.zrot,rotatedShape);
+        rotatedShape = this.#rotX(x3d,rotatedShape);
+        rotatedShape = this.#rotY(y3d,rotatedShape);
+        rotatedShape = this.#rotZ(z3d,rotatedShape);
         //Project shape.
         let projectedShape = this.#projectShape(rotatedShape);
         //Scale shape.
