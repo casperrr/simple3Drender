@@ -12,13 +12,17 @@
         
         <canvas id="canvas" width="800" height="800"></canvas>
         <div class="inputs">
-            <p>3D proj rotations</p>
-            <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="x3d">
-            <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="y3d">
-            <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="z3d">
-            <p>4D proj rotations</p>
-            <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="zw4d">
-            <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="xw4d">
+            <div class="sliderGroup">
+                <p>3D proj rotations</p>
+                <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="x3d">
+                <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="y3d">
+                <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="z3d">
+            </div>
+            <div class="sliderGroup">
+                <p>4D proj rotations</p>
+                <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="zw4d">
+                <input type="range" min="0" max="10" value="0" class="slider" step="0.001" id="xw4d">
+            </div>
 
         </div>
         <script src="script.js"></script>
@@ -43,12 +47,16 @@
         .inputs{
             display: flex;
             flex-wrap: wrap;
-            width: 100%;
-            max-width: 1000px;
-            align-content:flex-start ;
+            flex-direction: row;
+            flex: auto;
+            align-content: flex-start;
+            justify-content: center;
         }
-        .slider{
-            width: 100%;
+        .sliderGroup{
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 100%;
+            max-width: 800px;
         }
     </style>
 </body>
