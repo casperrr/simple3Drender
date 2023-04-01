@@ -2,6 +2,8 @@ const canvas = document.getElementById("canvas");
 const c = canvas.getContext('2d');
 
 // Globals
+const pi = Math.PI;
+
 let cube;
 let hypercube;
 let render;
@@ -17,7 +19,7 @@ function init(){
     hypercube = new Cube4D();
     hypercube.makeCube();
     render = new Render3D(false,4);
-    render4D = new Render4D(false,2);
+    render4D = new Render4D(false,2.5);
     projecTo3D = new Cube();
     //cube.makeCube();
 
@@ -35,7 +37,12 @@ function loop(){
     hypercube.makeCube();
     render4D.draw4D(hypercube);
 
-    projecTo3D.yrot += 0.003;
+    // hypercube.xrot += 0.001;
+    // hypercube.xrot = pi/2;
+    // hypercube.yrot = -90;
+    hypercube.zrot += 0.001;
+    hypercube.wrot += 0.003;
+    //projecTo3D.yrot += 0.003;
     //cube.xrot += 0.01;
     //cube.yrot += 0.01;
 
@@ -80,7 +87,7 @@ class Cube{
         this.xrot = 0;
         this.yrot = 0;
         this.zrot = 0;
-        this.scl = 300;
+        this.scl = 400;
         //this.pos = ima not worry about this for now. 
     }
 
@@ -133,17 +140,17 @@ class Render4D{
     draw4D(shape){
         let rotatedShape = shape.points;
         //Rotate shape.
-
+        rotatedShape = this.#rotX(shape.xrot,rotatedShape);
+        rotatedShape = this.#rotY(shape.yrot,rotatedShape);
+        rotatedShape = this.#rotZ(shape.zrot,rotatedShape);
+        rotatedShape = this.#rotZW(shape.wrot,rotatedShape);
         //Project shape to 3D
         let projectedShape = this.#projectShape(rotatedShape);
         //Send 3D projection to 3D render.
-        
         projecTo3D.points = projectedShape;
         render.drawShape(projecTo3D);
 
     }
-
-    
 
     #projectShape(shape){
         let projShape = shape;
@@ -164,6 +171,64 @@ class Render4D{
         ];
         return point.dotProd(projMat);
     }
+
+    #applyRotMat(matrix,arr){
+        let newArr = [];
+        for(let i = 0; i < arr.length; i++){
+            newArr[i] = arr[i].dotProd(matrix);
+        }
+        return newArr;
+    } 
+
+    #rotX(ang,arr){
+        let rXmat = [
+            [1,0,0,0],
+            [0,Math.cos(ang),-Math.sin(ang),0],
+            [0,Math.sin(ang),Math.cos(ang),0],
+            [0,0,0,1]
+        ];
+        return this.#applyRotMat(rXmat,arr);
+    }
+    
+    #rotY(ang,arr){
+        let rYmat = [
+            [Math.cos(ang),0,Math.sin(ang),0],
+            [0,1,0,0],
+            [-Math.sin(ang),0,Math.cos(ang),0],
+            [0,0,0,1]
+        ];
+        return this.#applyRotMat(rYmat,arr);
+    }
+    
+    #rotZ(ang,arr){
+        let rZmat = [
+            [Math.cos(ang),-Math.sin(ang),0,0],
+            [Math.sin(ang),Math.cos(ang),0,0],
+            [0,0,1,0],
+            [0,0,0,1]
+        ];
+        return this.#applyRotMat(rZmat,arr);
+    }
+
+    #rotXW(ang,arr){
+        let rWmat = [
+            [Math.cos(ang),0,0,-Math.sin(ang)],
+            [0,1,0,0],
+            [0,0,1,0],
+            [Math.sin(ang),0,0,Math.cos(ang)]
+        ];
+        return this.#applyRotMat(rWmat,arr);
+    }
+
+    #rotZW(ang,arr){
+        let rWmat = [
+            [1,0,0,0],
+            [0,1,0,0],
+            [0,0,Math.cos(ang),-Math.sin(ang)],
+            [0,0,Math.sin(ang),Math.cos(ang)]
+        ];
+        return this.#applyRotMat(rWmat,arr);
+    }
 }
 
 class Render3D{
@@ -171,13 +236,14 @@ class Render3D{
         this.ortho = ortho;
         this.distance = distance;
         this.pointSize = 3;
+        this.drawColors = true;
     }
 
 
     drawShape(shape){
         let rotatedShape = shape.points;
         //Rotate shape.
-        rotatedShape = this.#rotX(shape.xrot,rotatedShape);
+        rotatedShape = this.#rotX(-pi/2,rotatedShape);
         rotatedShape = this.#rotY(shape.yrot,rotatedShape);
         rotatedShape = this.#rotZ(shape.zrot,rotatedShape);
         //Project shape.
@@ -185,7 +251,7 @@ class Render3D{
         //Scale shape.
         projectedShape.forEach(i => i.scalar(shape.scl));
         //Draw shape.
-        this.#drawPoints(projectedShape);
+        //this.#drawPoints(projectedShape);
         this.#connectPointsHypercube(projectedShape);
     }
 
@@ -202,22 +268,27 @@ class Render3D{
         let order = [0,1,3,2]
         for(let i = 0; i < 4; i++){
             //inner cube
-            this.#connectPoints(shape[order[i]],shape[order[(i+1)%4]]);
-            this.#connectPoints(shape[order[i]+4],shape[order[(i+1)%4]+4]);
-            this.#connectPoints(shape[i],shape[i+4]);
+            this.#connectPoints(shape[order[i]],shape[order[(i+1)%4]],'#ff00aa');
+            this.#connectPoints(shape[order[i]+4],shape[order[(i+1)%4]+4],'#ff00aa');
+            this.#connectPoints(shape[i],shape[i+4],'#ff00aa');
             //outer cube
-            this.#connectPoints(shape[order[i]+8],shape[order[(i+1)%4]+8]);
-            this.#connectPoints(shape[order[i]+8+4],shape[order[(i+1)%4]+8+4]);
-            this.#connectPoints(shape[i+8],shape[i+8+4]);
+            this.#connectPoints(shape[order[i]+8],shape[order[(i+1)%4]+8],'#4477ff');
+            this.#connectPoints(shape[order[i]+8+4],shape[order[(i+1)%4]+8+4],'#4477ff');
+            this.#connectPoints(shape[i+8],shape[i+8+4],'#4477ff');
             //connect inner to outer
-            this.#connectPoints(shape[i],shape[i+8]);
-            this.#connectPoints(shape[i+4],shape[i+8+4]);
+            this.#connectPoints(shape[i],shape[i+8],'#22fe88');
+            this.#connectPoints(shape[i+4],shape[i+8+4],'#22fe88');
         }
 
     }
 
-    #connectPoints(a,b){
-        c.strokeStyle = '#ffffff';
+    #connectPoints(a,b,col){
+        if(col === undefined || !this.drawColors){
+            c.strokeStyle = '#ffffff';
+        } else{
+            c.strokeStyle = col;
+        }
+            
         c.lineWidth = 2;
         c.beginPath();
         c.moveTo(a.mat[0],a.mat[1]);
