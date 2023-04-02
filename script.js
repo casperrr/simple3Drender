@@ -22,6 +22,10 @@ var z3d = 0;
 var zw4d = 0;
 var xw4d = 0;
 
+var scl3d = 400;
+
+var dis4d = 2.5;
+var dis3d = 4;
 
 //Event handler for sliders
 inputs.addEventListener('input',(e)=>{
@@ -61,14 +65,14 @@ function loop(){
     // hypercube.xrot = pi/2;
     // hypercube.yrot = -90;
     // hypercube.zrot += 0.001;
-    // hypercube.wrot += 0.003;
-    //projecTo3D.yrot += 0.003;
+    // projecTo3D.yrot += 0.003;
     //cube.xrot += 0.01;
     //cube.yrot += 0.01;
-
+    
     hypercube.xwrot=xw4d;
-    hypercube.zwrot=zw4d;
-
+    //hypercube.zwrot=zw4d;
+    
+    hypercube.zwrot += 0.003;
 
     requestAnimationFrame(loop);
 }
@@ -163,6 +167,8 @@ class Render4D{
     }
 
     draw4D(shape){
+        this.distance = dis4d;
+
         let rotatedShape = shape.points;
         //Rotate shape.
         rotatedShape = this.#rotX(shape.xrot,rotatedShape);
@@ -267,6 +273,9 @@ class Render3D{
 
 
     drawShape(shape){
+        this.distance = dis3d;
+        shape.scl = scl3d;
+
         let rotatedShape = shape.points;
         //Rotate shape.
         rotatedShape = this.#rotX(x3d,rotatedShape);
